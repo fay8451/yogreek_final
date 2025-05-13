@@ -1,7 +1,8 @@
 services:
+  # Frontend Next.js application
   - type: web
     name: yogreek-frontend
-    env: nginx
+    env: node
     buildCommand: |
       cd frontend
       rm -rf node_modules .next
@@ -13,6 +14,8 @@ services:
       cd frontend
       npm start
     envVars:
+      - key: NODE_ENV
+        value: production
       - key: PORT
         value: 3000
       - key: NEXT_PUBLIC_API_URL
@@ -21,73 +24,8 @@ services:
         value: https://yogreek-user-service.onrender.com
     healthCheckPath: /
     autoDeploy: true
-    nginxConfig: |
-      location / {
-        proxy_pass http://localhost:3000;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_cache_bypass $http_upgrade;
-      }
 
-      # Product Service API
-      location /api/ {
-        proxy_pass https://yogreek-product-service.onrender.com/api/;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_cache_bypass $http_upgrade;
-      }
-
-      # User Service API
-      location /user_api/ {
-        proxy_pass https://yogreek-user-service.onrender.com/api/;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_cache_bypass $http_upgrade;
-      }
-
-      # Product Service Admin
-      location /admin/ {
-        proxy_pass https://yogreek-product-service.onrender.com/admin/;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_cache_bypass $http_upgrade;
-      }
-
-      # User Service Admin
-      location /user_admin/ {
-        proxy_pass https://yogreek-user-service.onrender.com/admin/;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_cache_bypass $http_upgrade;
-      }
-
-      # Static files
-      location /static/ {
-        alias /opt/render/project/src/frontend/.next/static/;
-        expires 30d;
-        add_header Cache-Control "public, no-transform";
-      }
-
-      # Media files
-      location /media/ {
-        proxy_pass https://yogreek-product-service.onrender.com/media/;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_cache_bypass $http_upgrade;
-      }
-
+  # Product Service
   - type: web
     name: yogreek-product-service
     env: python
@@ -113,7 +51,12 @@ services:
         value: yogreek-product-service.onrender.com
       - key: DEBUG
         value: "False"
+      - key: CORS_ALLOWED_ORIGINS
+        value: https://yogreek-frontend.onrender.com
+    healthCheckPath: /health/
+    autoDeploy: true
 
+  # User Service
   - type: web
     name: yogreek-user-service
     env: python
@@ -131,9 +74,15 @@ services:
         generateValue: true
       - key: ALLOWED_HOSTS
         value: yogreek-user-service.onrender.com
+      - key: DEBUG
+        value: "False"
+      - key: CORS_ALLOWED_ORIGINS
+        value: https://yogreek-frontend.onrender.com
+    healthCheckPath: /health/
+    autoDeploy: true
 
 databases:
   - name: yogreek-db
-    databaseName: yogreek
+    databaseName: yogreek_db
     user: yogreek
     plan: free 
