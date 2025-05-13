@@ -7,7 +7,7 @@ services:
       cd frontend
       rm -rf node_modules .next
       npm install
-      npm install -D tailwindcss@latest postcss@latest autoprefixer@latest
+      npm install tailwindcss@latest postcss@latest autoprefixer@latest
       npx tailwindcss init -p
       npm run build
     startCommand: |
