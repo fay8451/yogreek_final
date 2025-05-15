@@ -6,7 +6,9 @@ services:
     plan: free
     buildCommand: |
       cd frontend
+      rm -rf node_modules package-lock.json
       npm install
+      npm install next@14.0.1
       echo 'NEXT_PUBLIC_API_URL="http://localhost"' > .env.production
       npm run build
     startCommand: cd frontend && npm start
