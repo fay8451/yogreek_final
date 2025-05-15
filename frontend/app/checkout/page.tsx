@@ -24,6 +24,25 @@ interface OrderResponse {
   // Add other response fields as needed
 }
 
+interface OrderRequest {
+  items: {
+    product_id: string;
+    quantity: number;
+    price: string;
+  }[];
+  shipping_address: {
+    name: string;
+    email: string;
+    phone: string;
+    address: string;
+    city: string;
+    zipCode: string;
+  };
+  payment_method: PaymentMethod;
+  shipping_method: ShippingMethod;
+  total_amount: string;
+}
+
 export default function CheckoutPage() {
   const [shippingMethod, setShippingMethod] = useState<ShippingMethod>("delivery")
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("card")
@@ -65,7 +84,7 @@ export default function CheckoutPage() {
 
   // Calculate totals
   const subtotal = items.reduce(
-    (sum, item) => sum + Number.parseFloat(item.product.price.toString()) * item.quantity, 
+    (sum, item) => sum + Number.parseFloat(item.price.toString()) * item.quantity,
     0
   );
   const shippingCost = shippingMethod === "delivery" ? 80 : 0;
@@ -111,19 +130,19 @@ export default function CheckoutPage() {
       sessionStorage.setItem("orderCartItems", JSON.stringify(items));
 
       // Create order in the backend
-      const orderData = {
-        items: items.map(item => ({
-          product_id: item.product.id,
+      const orderData: OrderRequest = {
+        items: items.map((item) => ({
+          product_id: item.id,
           quantity: item.quantity,
-          price: item.product.price.toString()
+          price: item.price.toString()
         })),
         shipping_address: {
           name: formData.name,
           email: formData.email,
           phone: formData.phone,
-          address: formData.address || "Pickup",
-          city: formData.city || "Pickup",
-          zipCode: formData.zipCode || "Pickup"
+          address: formData.address,
+          city: formData.city,
+          zipCode: formData.zipCode
         },
         payment_method: paymentMethod,
         shipping_method: shippingMethod,
@@ -372,21 +391,21 @@ export default function CheckoutPage() {
 
             <div className="max-h-60 overflow-y-auto mb-4">
               {items.map((item) => (
-                <div key={item.product.id} className="flex items-center justify-between mb-4">
+                <div key={item.id} className="flex items-center justify-between mb-4">
                   <div className="flex items-center">
                     <div className="w-16 h-16 rounded-lg overflow-hidden mr-3">
                       <img
-                        src={item.product.image_url || "/placeholder.svg"}
-                        alt={item.product.name}
+                        src={item.image || "/placeholder.svg"}
+                        alt={item.name}
                         className="w-full h-full object-cover"
                       />
                     </div>
                     <div>
-                      <div className="font-medium">{item.product.name}</div>
-                      <div>{item.product.price.toString()} × {item.quantity}</div>
+                      <div className="font-medium">{item.name}</div>
+                      <div>{item.price.toString()} × {item.quantity}</div>
                     </div>
                   </div>
-                  <div className="font-medium">฿ {(Number.parseFloat(item.product.price.toString()) * item.quantity).toFixed(2)}</div>
+                  <div className="font-medium">฿ {(Number.parseFloat(item.price.toString()) * item.quantity).toFixed(2)}</div>
                 </div>
               ))}
             </div>

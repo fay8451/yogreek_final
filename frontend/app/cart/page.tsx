@@ -8,12 +8,11 @@ import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 
 interface CartItem {
-  id: string
-  quantity: number
-}
-
-interface CartDisplayItem extends Product {
-  quantity: number
+  id: string;
+  name: string;
+  price: number;
+  quantity: number;
+  image: string;
 }
 
 export default function CartPage() {
@@ -34,7 +33,7 @@ export default function CartPage() {
   }
 
   // Calculate total price
-  const totalPrice = items.reduce((sum, item) => sum + Number(item.product.price) * item.quantity, 0).toFixed(2)
+  const totalPrice = items.reduce((sum: number, item: CartItem) => sum + Number(item.price) * item.quantity, 0).toFixed(2)
 
   // Navigate to checkout
   const handleCheckout = () => {
@@ -125,47 +124,46 @@ export default function CartPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {items.map((item) => (
-                    <tr key={item.product.id} className="border-b border-gray-200">
+                  {items.map((item: CartItem) => (
+                    <tr key={item.id} className="border-b border-gray-200">
                       <td className="py-6 px-2">
                         <div className="flex items-center">
                           <div className="w-24 h-24 mr-4 overflow-hidden rounded-lg">
                             <img
-                              src={item.product.image_url || "/placeholder.svg"}
-                              alt={item.product.name}
+                              src={item.image || "/placeholder.svg"}
+                              alt={item.name}
                               width={96}
                               height={96}
                               className="object-cover w-full h-full"
                             />
                           </div>
                           <div>
-                            <div className="font-medium">{item.product.name}</div>
-                            <div className="text-sm text-gray-500">{item.product.weight}</div>
+                            <div className="font-medium">{item.name}</div>
                           </div>
                         </div>
                       </td>
-                      <td className="py-6 px-2 text-right">฿ {item.product.price}</td>
+                      <td className="py-6 px-2 text-right">฿ {item.price}</td>
                       <td className="py-6 px-2">
                         <div className="flex items-center justify-center">
                           <button
-                            onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
+                            onClick={() => updateQuantity(item.id, item.quantity - 1)}
                             className="w-8 h-8 flex items-center justify-center bg-yellow-100 rounded-l-md"
                           >
                             <Minus className="w-4 h-4" />
                           </button>
                           <div className="w-10 h-8 flex items-center justify-center bg-yellow-100">{item.quantity}</div>
                           <button
-                            onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
+                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
                             className="w-8 h-8 flex items-center justify-center bg-yellow-100 rounded-r-md"
                           >
                             <Plus className="w-4 h-4" />
                           </button>
                         </div>
                       </td>
-                      <td className="py-6 px-2 text-right">฿ {calculateSubtotal(item.product.price, item.quantity)}</td>
+                      <td className="py-6 px-2 text-right">฿ {calculateSubtotal(item.price, item.quantity)}</td>
                       <td className="py-6 px-2">
                         <button
-                          onClick={() => removeItem(item.product.id)}
+                          onClick={() => removeItem(item.id)}
                           className="text-red-500 hover:text-red-700"
                         >
                           Remove

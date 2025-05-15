@@ -41,7 +41,13 @@ export default function AllProducts() {
   }, []);
 
   const handleAddToCart = (product: Product) => {
-    addItem(product, 1);
+    addItem({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      quantity: 1,
+      image: product.image_url || "/placeholder.svg"
+    });
     setShowCartNotification(true);
     setTimeout(() => setShowCartNotification(false), 1500);
   };

@@ -54,7 +54,7 @@ const products = [
     {
       id: "5",
       name: "Chocolate Greek yogurt",
-      description: "กรีกโยเกิร์ตรสช็อคโกแลต รสชาติเข้มข้นของช็อคโกแลต โปรตีนสูง",
+      description: "1",
       weight: "130 g",
       price: "130.00",
       image: "https://thefoodiediaries.co/wp-content/uploads/2023/04/img_7612-e1680534690722.jpg",
@@ -64,7 +64,7 @@ const products = [
     {
       id: "6",
       name: "Blueberry Greek yogurt",
-      description: "กรีกโยเกิร์ตรสบลูเบอร์รี่  โปรตีนสูง",
+      description: "1",
       weight: "120 g",
       price: "150.00",
       image: "https://www.mjandhungryman.com/wp-content/uploads/2023/04/Blueberry-yogurt.jpg",
@@ -74,7 +74,7 @@ const products = [
     {
       id: "7",
       name: "Apple Cinnamon Greek yogurt",
-      description: "กรีกโยเกิร์ตรสแอปเปิ้ลซินนามอน  โปรตีนสูง",
+      description: "1ง",
       weight: "150 g",
       price: "140.00",
       image: "https://www.sugarsalted.com/wp-content/uploads/2023/10/caramelized-apple-yogurt-parfaits-dessert-jars-25feat.jpg",

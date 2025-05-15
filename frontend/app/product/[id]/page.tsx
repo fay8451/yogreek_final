@@ -82,7 +82,13 @@ export default function ProductPage() {
   };
 
   const addToCart = () => {
-    addItem(product, quantity);
+    addItem({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      quantity: quantity,
+      image: product.image_url || "/placeholder.svg"
+    });
     setShowCartNotification(true);
     setTimeout(() => setShowCartNotification(false), 1500);
   };

@@ -5,15 +5,16 @@ import { Search, ShoppingCart } from 'lucide-react'
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
+import { productApi } from '@/services/api'
 
 interface OrderItem {
-  id: string;
   product_id: string;
-  name: string;
-  price: string;
   quantity: number;
-  image_url: string;
-  status: "preparing" | "ready" | "delivered";
+  price: string;
+  product?: {
+    name: string;
+    image_url: string;
+  };
 }
 
 type OrderStatus = "processing" | "preparing" | "ready" | "delivered";
@@ -42,6 +43,7 @@ interface OrderApiResponse {
   id: string;
   order_number: string;
   order_date: string;
+  created_at: string;
   estimated_delivery: string;
   shipping_address: string | undefined;
   payment_method: string;
@@ -93,7 +95,9 @@ export default function OrderStatusPage() {
         // Fetch order details from API
         const response = await orderApi.getOrderById(orderId)
         const orderData = response as unknown as OrderApiResponse
-        console.log("Order data received:", orderData);
+        console.log("Raw API Response:", response);
+        console.log("Order Data:", orderData);
+        console.log("Order Items:", orderData.items);
 
         if (!orderData) {
           setError("Failed to fetch order details")
@@ -101,12 +105,52 @@ export default function OrderStatusPage() {
           return
         }
 
+        // Fetch product details for each item
+        const itemsWithProducts = await Promise.all(
+          orderData.items.map(async (item) => {
+            try {
+              console.log("Fetching product details for ID:", item.product_id);
+              const product = await productApi.getProductById(item.product_id);
+              console.log("Product details received:", product);
+              return {
+                ...item,
+                product: {
+                  name: product.name,
+                  image_url: product.image_url || "/placeholder.svg"
+                }
+              };
+            } catch (error) {
+              console.error(`Error fetching product ${item.product_id}:`, error);
+              return {
+                ...item,
+                product: {
+                  name: `Product #${item.product_id}`,
+                  image_url: "/placeholder.svg"
+                }
+              };
+            }
+          })
+        );
+
+        console.log("Items with products:", itemsWithProducts);
+
         // Map shipping_address object จาก field ต่างๆ ของ orderData
         const completeOrderDetails: OrderDetails = {
           id: orderData.id,
           order_number: orderData.order_number ?? "",
-          order_date: orderData.order_date ?? "",
-          estimated_delivery: orderData.estimated_delivery ?? "",
+          order_date: new Date(orderData.created_at).toLocaleString('th-TH', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+          }),
+          estimated_delivery: new Date(orderData.estimated_delivery).toLocaleString('th-TH', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          }),
           shipping_address: {
             name: orderData.name ?? "",
             email: orderData.email ?? "",
@@ -118,10 +162,11 @@ export default function OrderStatusPage() {
           payment_method: orderData.payment_method ?? "",
           status: orderData.status ?? "processing",
           shipping_method: orderData.shipping_method ?? "",
-          items: orderData.items ?? [],
+          items: itemsWithProducts,
           total_amount: orderData.total_amount ?? ""
         }
 
+        console.log("Complete order details:", completeOrderDetails);
         setOrderDetails(completeOrderDetails)
         setOrderStatus(orderData.status)
       } catch (error) {
@@ -296,25 +341,44 @@ export default function OrderStatusPage() {
             <div className="bg-white rounded-lg shadow-sm p-6">
               <h3 className="text-xl font-bold mb-4">Order Items</h3>
               <div className="space-y-4">
-                {orderDetails.items.map((item) => (
-                  <div key={item.id} className="flex items-center gap-4">
-                    <img
-                      src={item.image_url || "/placeholder.svg"}
-                      alt={item.name}
-                      className="w-20 h-20 object-cover rounded"
-                    />
-                    <div className="flex-1">
-                      <h4 className="font-medium">{item.name}</h4>
-                      <p className="text-sm text-gray-600">Quantity: {item.quantity}</p>
-                      <p className="text-[#7B3FE4] font-medium">
-                        {(Number.parseFloat(item.price) * item.quantity).toFixed(2)} THB
-                      </p>
+                {orderDetails.items && orderDetails.items.length > 0 ? (
+                  orderDetails.items.map((item) => (
+                    <div key={item.product_id} className="flex items-center gap-4 border-b border-gray-100 pb-4">
+                      <div className="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden">
+                        {item.product?.image_url ? (
+                          <img
+                            src={item.product.image_url}
+                            alt={item.product.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                            <span className="text-gray-400">No image</span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-medium text-lg">
+                          {item.product?.name || `Product #${item.product_id}`}
+                        </h4>
+                        <div className="mt-1 text-sm text-gray-600">
+                          <p>Quantity: {item.quantity}</p>
+                          <p>Price per item: {Number(item.price).toFixed(2)} THB</p>
+                        </div>
+                        <p className="text-[#7B3FE4] font-medium mt-2">
+                          Total: {(Number(item.price) * item.quantity).toFixed(2)} THB
+                        </p>
+                      </div>
+                      <div className={`px-3 py-1 rounded-full text-sm ${getStatusColor(orderStatus)}`}>
+                        {orderStatus}
+                      </div>
                     </div>
-                    <div className={`px-3 py-1 rounded-full text-sm ${getStatusColor(item.status)}`}>
-                      {item.status}
-                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-4 text-gray-500">
+                    No items found in this order
                   </div>
-                ))}
+                )}
               </div>
             </div>
           </div>
@@ -334,7 +398,7 @@ export default function OrderStatusPage() {
                 </div>
                 <div className="flex justify-between">
                   <span>Estimated Delivery</span>
-                  <span className="font-medium">{orderDetails.estimated_delivery}</span>
+                  <span className="font-medium">{orderDetails.estimated_delivery || 'Not available'}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Shipping Method</span>

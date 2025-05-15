@@ -6,12 +6,21 @@ const API_BASE_URL = '/api';
 
 interface OrderResponse {
   id: string;
+  order_number: string;
   status: string;
   total_amount: string;
   items: Array<{
     product_id: string;
     quantity: number;
     price: string;
+    product?: {
+      id: string;
+      name: string;
+      price: number;
+      image_url: string;
+      description?: string;
+      category?: string;
+    };
   }>;
   shipping_address: {
     name: string;
@@ -25,6 +34,8 @@ interface OrderResponse {
   shipping_method: string;
   created_at: string;
   updated_at: string;
+  order_date: string;
+  estimated_delivery: string;
 }
 
 interface OrderRequest {
