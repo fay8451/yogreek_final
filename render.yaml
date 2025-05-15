@@ -32,12 +32,13 @@ services:
       cd ecommerce/product_service
       python -m pip install --upgrade pip
       pip install -r requirements.txt
+      python manage.py makemigrations products
       python manage.py collectstatic --noinput
     startCommand: |
       cd ecommerce/product_service
       python manage.py migrate
+      python manage.py migrate products
       python create_superuser.py
-      python manage.py shell -c "from create_superuser import create_superuser; create_superuser()"
       gunicorn product_service.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --threads 4 --timeout 60
     envVars:
       - key: DJANGO_SETTINGS_MODULE
