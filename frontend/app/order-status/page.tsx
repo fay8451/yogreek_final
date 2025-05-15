@@ -12,8 +12,12 @@ interface OrderItem {
   quantity: number;
   price: string;
   product?: {
+    id: string;
     name: string;
+    price: number;
     image_url: string;
+    description?: string;
+    category?: string;
   };
 }
 
@@ -99,7 +103,7 @@ export default function OrderStatusPage() {
         console.log("Order Data:", orderData);
         console.log("Order Items:", orderData.items);
 
-        if (!orderData) {
+        if (!orderData || !orderData.items) {
           setError("Failed to fetch order details")
           setIsLoading(false)
           return
@@ -115,8 +119,12 @@ export default function OrderStatusPage() {
               return {
                 ...item,
                 product: {
+                  id: product.id,
                   name: product.name,
-                  image_url: product.image_url || "/placeholder.svg"
+                  price: product.price,
+                  image_url: product.image_url || "/placeholder.svg",
+                  description: product.description,
+                  category: product.category
                 }
               };
             } catch (error) {
@@ -124,8 +132,12 @@ export default function OrderStatusPage() {
               return {
                 ...item,
                 product: {
+                  id: `Product #${item.product_id}`,
                   name: `Product #${item.product_id}`,
-                  image_url: "/placeholder.svg"
+                  price: 0,
+                  image_url: "/placeholder.svg",
+                  description: "",
+                  category: ""
                 }
               };
             }
@@ -350,6 +362,10 @@ export default function OrderStatusPage() {
                             src={item.product.image_url}
                             alt={item.product.name}
                             className="w-full h-full object-cover"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.src = "/placeholder.svg";
+                            }}
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center bg-gray-200">
@@ -361,7 +377,10 @@ export default function OrderStatusPage() {
                         <h4 className="font-medium text-lg">
                           {item.product?.name || `Product #${item.product_id}`}
                         </h4>
-                        <div className="mt-1 text-sm text-gray-600">
+                        {item.product?.description && (
+                          <p className="text-sm text-gray-600 mt-1">{item.product.description}</p>
+                        )}
+                        <div className="mt-2 text-sm text-gray-600">
                           <p>Quantity: {item.quantity}</p>
                           <p>Price per item: {Number(item.price).toFixed(2)} THB</p>
                         </div>
