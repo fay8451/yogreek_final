@@ -18,20 +18,8 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from rest_framework.routers import DefaultRouter
-from products.views import ProductViewSet, OrderViewSet, ProductOrderViewSet
 
-# Create a router and register our viewsets with it
-router = DefaultRouter()
-router.register(r'products', ProductViewSet, basename='product')
-router.register(r'orders', OrderViewSet, basename='order')
-router.register(r'product-orders', ProductOrderViewSet, basename='productorder')
-
-# API endpoints:
-# /api/products/ (CRUD สินค้า)
-# /api/orders/ (CRUD ออเดอร์)
-# /api/product-orders/ (CRUD รายการสินค้าในออเดอร์)
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include(router.urls)),
+    path('api/', include('products.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

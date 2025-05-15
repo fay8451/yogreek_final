@@ -5,7 +5,7 @@ import datetime
 from rest_framework import status, viewsets, permissions
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view
 from .models import Product, Order, ProductOrder
 from .serializers import ProductSerializer, ProductListSerializer, OrderSerializer, OrderCreateSerializer, ProductOrderSerializer
 
@@ -160,3 +160,13 @@ class ProductOrderViewSet(viewsets.ModelViewSet):
     queryset = ProductOrder.objects.all()
     serializer_class = ProductOrderSerializer
     permission_classes = [permissions.AllowAny]
+
+@api_view(['GET'])
+def health_check(request):
+    """
+    Health check endpoint for monitoring service status
+    """
+    return Response(
+        {"status": "healthy"},
+        status=status.HTTP_200_OK
+    )
