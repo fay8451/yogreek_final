@@ -6,16 +6,16 @@ services:
     plan: free
     buildCommand: |
       cd frontend
-      npm install
+      npm ci
       npm run build
-    startCommand: cd frontend && npm start
+    startCommand: cd frontend && NODE_ENV=production npm start
     envVars:
       - key: NODE_ENV
         value: production
       - key: NEXT_PUBLIC_API_URL
-        value: https://yogreek-product-service.onrender.com
+        sync: false # ให้ Render กำหนดค่าเอง
       - key: NEXT_PUBLIC_USER_API_URL
-        value: https://yogreek-user-service.onrender.com
+        sync: false # ให้ Render กำหนดค่าเอง
     healthCheckPath: /
     autoDeploy: true
 
@@ -26,11 +26,13 @@ services:
     plan: free
     buildCommand: |
       cd ecommerce/product_service
+      python -m pip install --upgrade pip
       pip install -r requirements.txt
       python manage.py collectstatic --noinput
     startCommand: |
       cd ecommerce/product_service
-      gunicorn product_service.wsgi:application --workers 1 --threads 8
+      python manage.py migrate
+      gunicorn product_service.wsgi:application --bind 0.0.0.0:$PORT --workers 1 --threads 8 --timeout 60
     envVars:
       - key: DJANGO_SETTINGS_MODULE
         value: product_service.settings
@@ -41,11 +43,15 @@ services:
       - key: SECRET_KEY
         generateValue: true
       - key: ALLOWED_HOSTS
-        value: .onrender.com
+        value: "*"
       - key: DEBUG
         value: "False"
       - key: CORS_ALLOWED_ORIGINS
-        value: https://yogreek-frontend.onrender.com
+        value: "*"
+      - key: CSRF_TRUSTED_ORIGINS
+        value: "https://*.onrender.com"
+      - key: PYTHONUNBUFFERED
+        value: "1"
     healthCheckPath: /api/health/
     autoDeploy: true
 
@@ -56,11 +62,13 @@ services:
     plan: free
     buildCommand: |
       cd ecommerce/user_service
+      python -m pip install --upgrade pip
       pip install -r requirements.txt
       python manage.py collectstatic --noinput
     startCommand: |
       cd ecommerce/user_service
-      gunicorn config.wsgi:application --workers 1 --threads 8
+      python manage.py migrate
+      gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 1 --threads 8 --timeout 60
     envVars:
       - key: DJANGO_SETTINGS_MODULE
         value: config.settings.production
@@ -71,11 +79,15 @@ services:
       - key: SECRET_KEY
         generateValue: true
       - key: ALLOWED_HOSTS
-        value: .onrender.com
+        value: "*"
       - key: DEBUG
         value: "False"
       - key: CORS_ALLOWED_ORIGINS
-        value: https://yogreek-frontend.onrender.com
+        value: "*"
+      - key: CSRF_TRUSTED_ORIGINS
+        value: "https://*.onrender.com"
+      - key: PYTHONUNBUFFERED
+        value: "1"
     healthCheckPath: /api/health/
     autoDeploy: true
 
