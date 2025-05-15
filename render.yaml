@@ -36,7 +36,7 @@ services:
     startCommand: |
       cd ecommerce/product_service
       python manage.py migrate
-      python manage.py createsuperuser --noinput || true
+      DJANGO_SUPERUSER_USERNAME=admin DJANGO_SUPERUSER_EMAIL=admin@example.com DJANGO_SUPERUSER_PASSWORD=Admin123! python manage.py createsuperuser --noinput || true
       gunicorn product_service.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --threads 4 --timeout 60
     envVars:
       - key: DJANGO_SETTINGS_MODULE
@@ -62,7 +62,7 @@ services:
       - key: DJANGO_SUPERUSER_EMAIL
         value: "admin@example.com"
       - key: DJANGO_SUPERUSER_PASSWORD
-        generateValue: true
+        value: "Admin123!"
     healthCheckPath: /api/health/
     autoDeploy: true
 
