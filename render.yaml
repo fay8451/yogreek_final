@@ -7,13 +7,16 @@ services:
     buildCommand: |
       cd frontend
       npm ci
+      echo 'NEXT_PUBLIC_API_URL="http://localhost"' > .env.production
       npm run build
-    startCommand: cd frontend && NODE_ENV=production npm start
+    startCommand: cd frontend && npm start
     envVars:
       - key: NODE_ENV
         value: production
       - key: NEXT_PUBLIC_API_URL
-        value: http://localhost/api # หรือใส่ URL ของ API ที่ใช้จริง
+        value: http://localhost
+      - key: PORT
+        value: 3000
     healthCheckPath: /
     autoDeploy: true
 
