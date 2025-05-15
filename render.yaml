@@ -13,9 +13,7 @@ services:
       - key: NODE_ENV
         value: production
       - key: NEXT_PUBLIC_API_URL
-        sync: false # ให้ Render กำหนดค่าเอง
-      - key: NEXT_PUBLIC_USER_API_URL
-        sync: false # ให้ Render กำหนดค่าเอง
+        value: http://localhost/api # หรือใส่ URL ของ API ที่ใช้จริง
     healthCheckPath: /
     autoDeploy: true
 
